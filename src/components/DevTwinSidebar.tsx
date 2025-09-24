@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, Search, FileText, ArrowRight, Clock, Code, Bug, TestTube, RefreshCw } from "lucide-react";
+import { Plus, Search, ArrowRight, Code } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
@@ -15,15 +15,15 @@ export function DevTwinSidebar({ onNewChat, onSelectChat, selectedChatId }: Side
   const [searchTerm, setSearchTerm] = useState("");
 
   const exploredFeatures = [
-    { name: "API Integration", icon: Code },
-    { name: "Auth Flow", icon: FileText },
+    { name: "API Integration" },
+    { name: "Auth Flow" },
   ];
 
   const chatHistory = [
-    { id: "1", title: "Onboarding Query #1", time: "5 minutes ago", icon: Clock },
-    { id: "2", title: "Component Debug", time: "1 hour ago", icon: Bug },
-    { id: "3", title: "Test Case Generation", time: "Yesterday", icon: TestTube },
-    { id: "4", title: "Refactor Suggestion", time: "2 days ago", icon: RefreshCw },
+    { id: "1", title: "Onboarding Query #1" },
+    { id: "2", title: "Component Debug" },
+    { id: "3", title: "Test Case Generation" },
+    { id: "4", title: "Refactor Suggestion" },
   ];
 
   const filteredHistory = chatHistory.filter(chat =>
@@ -67,7 +67,7 @@ export function DevTwinSidebar({ onNewChat, onSelectChat, selectedChatId }: Side
       {/* Explore Feature Summaries */}
       <div className="px-4 mb-4">
         <Button 
-          className="w-full justify-between bg-accent hover:bg-accent-hover text-accent-foreground font-medium"
+          className="w-full justify-between bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
           size="lg"
         >
           <span>Explore Feature Summaries</span>
@@ -83,9 +83,8 @@ export function DevTwinSidebar({ onNewChat, onSelectChat, selectedChatId }: Side
             <Button
               key={feature.name}
               variant="ghost"
-              className="w-full justify-start gap-2 h-8 text-sm hover:bg-sidebar-hover"
+              className="w-full justify-start h-8 text-sm hover:bg-sidebar-accent"
             >
-              <feature.icon className="w-3 h-3" />
               {feature.name}
             </Button>
           ))}
@@ -103,15 +102,11 @@ export function DevTwinSidebar({ onNewChat, onSelectChat, selectedChatId }: Side
                 variant="ghost"
                 onClick={() => onSelectChat(chat.id)}
                 className={cn(
-                  "w-full justify-start gap-2 h-auto p-2 text-left hover:bg-sidebar-hover",
-                  selectedChatId === chat.id && "bg-sidebar-hover"
+                  "w-full justify-start h-8 p-2 text-left text-sm hover:bg-sidebar-accent",
+                  selectedChatId === chat.id && "bg-sidebar-accent"
                 )}
               >
-                <chat.icon className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">{chat.title}</div>
-                  <div className="text-xs text-muted-foreground">{chat.time}</div>
-                </div>
+                <span className="truncate">{chat.title}</span>
               </Button>
             ))}
           </div>
