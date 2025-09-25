@@ -57,23 +57,8 @@ export function DevTwinSidebar({ onNewChat, onSelectChat, selectedChatId, isColl
           </Button>
         </div>
         
-        {/* User Avatar */}
-        <div className={cn("flex items-center gap-3 mb-4", isCollapsed && "justify-center")}>
-          <Avatar className="w-8 h-8">
-            <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-              DV
-            </AvatarFallback>
-          </Avatar>
-          {!isCollapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">DevTwin User</p>
-              <p className="text-xs text-muted-foreground truncate">developer@devtwin.ai</p>
-            </div>
-          )}
-        </div>
-        
-        {!isCollapsed && (
+        {/* New Chat Button */}
+        {!isCollapsed ? (
           <Button 
             onClick={onNewChat}
             className="w-full justify-start gap-2 bg-card hover:bg-sidebar-hover border border-border"
@@ -82,12 +67,22 @@ export function DevTwinSidebar({ onNewChat, onSelectChat, selectedChatId, isColl
             <Plus className="w-4 h-4" />
             New Chat
           </Button>
+        ) : (
+          <Button 
+            onClick={onNewChat}
+            size="sm"
+            className="w-8 h-8 p-0 bg-card hover:bg-sidebar-hover border border-border"
+            variant="outline"
+            title="New Chat"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
         )}
       </div>
 
       {/* Search */}
-      {!isCollapsed && (
-        <div className="p-4">
+      <div className="p-4">
+        {!isCollapsed ? (
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -97,8 +92,17 @@ export function DevTwinSidebar({ onNewChat, onSelectChat, selectedChatId, isColl
               className="pl-9 bg-card border-border"
             />
           </div>
-        </div>
-      )}
+        ) : (
+          <Button 
+            size="sm"
+            className="w-8 h-8 p-0 bg-card hover:bg-sidebar-hover border border-border"
+            variant="outline"
+            title="Search Chat"
+          >
+            <Search className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
 
       {/* Explore Feature Summaries */}
       {!isCollapsed && (
@@ -149,7 +153,7 @@ export function DevTwinSidebar({ onNewChat, onSelectChat, selectedChatId, isColl
                 title={isCollapsed ? chat.title : undefined}
               >
                 {isCollapsed ? (
-                  <div className="w-2 h-2 rounded-full bg-current"></div>
+                  <div className="w-1 h-1 rounded-full bg-current"></div>
                 ) : (
                   <span className="truncate">{chat.title}</span>
                 )}
@@ -157,6 +161,24 @@ export function DevTwinSidebar({ onNewChat, onSelectChat, selectedChatId, isColl
             ))}
           </div>
         </ScrollArea>
+      </div>
+
+      {/* User Profile at Bottom */}
+      <div className="p-4 border-t border-sidebar-border mt-auto">
+        <div className={cn("flex items-center gap-3", isCollapsed && "justify-center")}>
+          <Avatar className="w-8 h-8">
+            <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+              DV
+            </AvatarFallback>
+          </Avatar>
+          {!isCollapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">DevTwin User</p>
+              <p className="text-xs text-muted-foreground truncate">developer@devtwin.ai</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -8,100 +8,100 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Color palette from image: cream, sage green, dark blue, light blue */
-    --background: 35 24% 94%; /* #f5efe6 cream */
-    --foreground: 222.2 84% 4.9%;
+    /* Color palette from new image: dark blue, teal, green, cream */
+    --background: 45 77% 89%; /* #fdeb9e cream/yellow */
+    --foreground: 220 100% 18%; /* #000b58 dark blue */
     
     /* Primary (dark blue from palette) */
-    --primary: 206 42% 58%; /* #6d94c5 dark blue */
-    --primary-foreground: 0 0% 98%;
-    --primary-hover: 206 42% 52%;
+    --primary: 220 100% 18%; /* #000b58 dark blue */
+    --primary-foreground: 45 77% 89%;
+    --primary-hover: 220 100% 22%;
     
-    /* Accent (light blue from palette) */
-    --accent: 206 42% 81%; /* #cbdceb light blue */
-    --accent-foreground: 222.2 84% 4.9%;
-    --accent-hover: 206 42% 76%;
+    /* Accent (teal from palette) */
+    --accent: 178 100% 20%; /* #006a67 teal/green */
+    --accent-foreground: 45 77% 89%;
+    --accent-hover: 178 100% 24%;
     
-    /* Secondary (sage green from palette) */
-    --secondary: 42 20% 88%; /* #e8dfca sage green */
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary (medium blue from palette) */
+    --secondary: 199 100% 19%; /* #003161 medium blue */
+    --secondary-foreground: 45 77% 89%;
     
     /* UI Elements */
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --muted: 42 20% 88%; /* sage green */
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --border: 42 20% 82%;
-    --input: 42 20% 82%;
-    --ring: 206 42% 58%;
+    --card: 45 77% 94%;
+    --card-foreground: 220 100% 18%;
+    --popover: 45 77% 94%;
+    --popover-foreground: 220 100% 18%;
+    --muted: 199 100% 24%; /* medium blue */
+    --muted-foreground: 45 60% 60%;
+    --border: 199 100% 28%;
+    --input: 199 100% 28%;
+    --ring: 220 100% 18%;
     --radius: 0.5rem;
     
     /* Status Colors */
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 45 77% 89%;
     
     /* Sidebar Specific */
-    --sidebar: 35 24% 94%; /* cream background */
-    --sidebar-foreground: 222.2 84% 4.9%;
-    --sidebar-border: 42 20% 82%;
-    --sidebar-hover: 42 20% 88%; /* sage green hover */
-    --sidebar-accent: 206 42% 90%; /* very light blue */
+    --sidebar: 45 77% 92%; /* cream background */
+    --sidebar-foreground: 220 100% 18%;
+    --sidebar-border: 199 100% 32%;
+    --sidebar-hover: 178 100% 25%; /* teal hover */
+    --sidebar-accent: 178 100% 30%; /* teal accent */
     
     /* Chat Interface */
-    --chat-user: 206 42% 58%; /* dark blue */
-    --chat-user-foreground: 0 0% 98%;
-    --chat-assistant: 0 0% 98%;
-    --chat-assistant-foreground: 222.2 84% 4.9%;
+    --chat-user: 220 100% 18%; /* dark blue */
+    --chat-user-foreground: 45 77% 89%;
+    --chat-assistant: 45 77% 96%;
+    --chat-assistant-foreground: 220 100% 18%;
   }
 
   .dark {
-    /* Dark Mode with color palette adaptation */
-    --background: 222.2 84% 4.9%;
-    --foreground: 0 0% 98%;
+    /* Dark Mode with new color palette adaptation */
+    --background: 220 100% 8%;
+    --foreground: 45 77% 89%;
     
-    /* Primary (darker version of dark blue) */
-    --primary: 206 42% 48%;
-    --primary-foreground: 0 0% 98%;
-    --primary-hover: 206 42% 52%;
+    /* Primary (lighter version for dark mode) */
+    --primary: 45 77% 89%;
+    --primary-foreground: 220 100% 18%;
+    --primary-hover: 45 77% 85%;
     
-    /* Accent (darker version of light blue) */
-    --accent: 206 42% 35%;
-    --accent-foreground: 0 0% 98%;
-    --accent-hover: 206 42% 40%;
+    /* Accent (teal for dark mode) */
+    --accent: 178 100% 35%;
+    --accent-foreground: 45 77% 89%;
+    --accent-hover: 178 100% 40%;
     
-    /* Secondary (darker sage green) */
-    --secondary: 42 15% 25%;
-    --secondary-foreground: 0 0% 98%;
+    /* Secondary (medium blue for dark mode) */
+    --secondary: 199 100% 25%;
+    --secondary-foreground: 45 77% 89%;
     
     /* UI Elements - Dark */
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 0 0% 98%;
-    --muted: 42 15% 25%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --border: 42 15% 30%;
-    --input: 42 15% 30%;
-    --ring: 206 42% 48%;
+    --card: 220 100% 12%;
+    --card-foreground: 45 77% 89%;
+    --popover: 220 100% 12%;
+    --popover-foreground: 45 77% 89%;
+    --muted: 199 100% 18%;
+    --muted-foreground: 45 40% 60%;
+    --border: 199 100% 22%;
+    --input: 199 100% 22%;
+    --ring: 45 77% 89%;
     
     /* Status Colors - Dark */
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 45 77% 89%;
     
     /* Sidebar Specific - Dark */
-    --sidebar: 217.2 32.6% 15%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-border: 42 15% 30%;
-    --sidebar-hover: 42 15% 25%;
-    --sidebar-accent: 206 42% 20%;
+    --sidebar: 220 100% 10%;
+    --sidebar-foreground: 45 77% 89%;
+    --sidebar-border: 199 100% 20%;
+    --sidebar-hover: 178 100% 20%;
+    --sidebar-accent: 178 100% 25%;
     
     /* Chat Interface - Dark */
-    --chat-user: 206 42% 48%;
-    --chat-user-foreground: 0 0% 98%;
-    --chat-assistant: 217.2 32.6% 17.5%;
-    --chat-assistant-foreground: 0 0% 98%;
+    --chat-user: 45 77% 89%;
+    --chat-user-foreground: 220 100% 18%;
+    --chat-assistant: 220 100% 12%;
+    --chat-assistant-foreground: 45 77% 89%;
   }
 }
 
