@@ -8,100 +8,98 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Color palette from new image: dark blue, teal, green, cream */
-    --background: 45 77% 89%; /* #fdeb9e cream/yellow */
-    --foreground: 220 100% 18%; /* #000b58 dark blue */
-    
-    /* Primary (dark blue from palette) */
-    --primary: 220 100% 18%; /* #000b58 dark blue */
-    --primary-foreground: 45 77% 89%;
-    --primary-hover: 220 100% 22%;
-    
-    /* Accent (teal from palette) */
-    --accent: 178 100% 20%; /* #006a67 teal/green */
-    --accent-foreground: 45 77% 89%;
-    --accent-hover: 178 100% 24%;
-    
-    /* Secondary (medium blue from palette) */
-    --secondary: 199 100% 19%; /* #003161 medium blue */
-    --secondary-foreground: 45 77% 89%;
-    
+    /* Color palette: #000000, #CFFFE2, #A2D5C6, #F6F6F6 */
+    --background: 0 0% 96.5%; /* #F6F6F6 light gray background */
+    --foreground: 0 0% 0%; /* #000000 black text */
+
+    /* Primary (sage green #A2D5C6) */
+    --primary: 158 38% 73%; /* #A2D5C6 sage green */
+    --primary-foreground: 0 0% 0%; /* black text on sage */
+    --primary-hover: 158 38% 68%;
+
+    /* Accent (light mint #CFFFE2) */
+    --accent: 140 100% 91%; /* #CFFFE2 light mint green */
+    --accent-foreground: 0 0% 0%;
+    --accent-hover: 140 100% 86%;
+
+    /* Secondary (light gray) */
+    --secondary: 0 0% 96.5%; /* #F6F6F6 light gray */
+    --secondary-foreground: 0 0% 0%;
+
     /* UI Elements */
-    --card: 45 77% 94%;
-    --card-foreground: 220 100% 18%;
-    --popover: 45 77% 94%;
-    --popover-foreground: 220 100% 18%;
-    --muted: 199 100% 24%; /* medium blue */
-    --muted-foreground: 45 60% 60%;
-    --border: 199 100% 28%;
-    --input: 199 100% 28%;
-    --ring: 220 100% 18%;
+    --card: 0 0% 100%; /* white cards */
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --muted: 140 100% 91%; /* light mint for muted elements */
+    --muted-foreground: 0 0% 25%;
+    --border: 158 38% 85%; /* lighter sage for borders */
+    --input: 158 38% 85%;
+    --ring: 158 38% 73%; /* sage green focus ring */
     --radius: 0.5rem;
-    
+
     /* Status Colors */
     --destructive: 0 84% 60%;
-    --destructive-foreground: 45 77% 89%;
-    
+    --destructive-foreground: 0 0% 98%;
+
     /* Sidebar Specific */
-    --sidebar: 45 77% 92%; /* cream background */
-    --sidebar-foreground: 220 100% 18%;
-    --sidebar-border: 199 100% 32%;
-    --sidebar-hover: 178 100% 25%; /* teal hover */
-    --sidebar-accent: 178 100% 30%; /* teal accent */
-    
+    --sidebar-background: 0 0% 96.5%; /* #F6F6F6 light gray */
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-border: 158 38% 85%;
+    --sidebar-hover: 140 100% 91%; /* light mint hover */
+    --sidebar-accent: 158 38% 73%; /* sage green accent */
+
     /* Chat Interface */
-    --chat-user: 220 100% 18%; /* dark blue */
-    --chat-user-foreground: 45 77% 89%;
-    --chat-assistant: 45 77% 96%;
-    --chat-assistant-foreground: 220 100% 18%;
+    --chat-background: 0 0% 100%; /* white chat background */
+    --chat-bubble-user: 158 38% 73%; /* sage green for user */
+    --chat-bubble-assistant: 140 100% 91%; /* light mint for assistant */
   }
 
   .dark {
-    /* Dark Mode with new color palette adaptation */
-    --background: 220 100% 8%;
-    --foreground: 45 77% 89%;
-    
-    /* Primary (lighter version for dark mode) */
-    --primary: 45 77% 89%;
-    --primary-foreground: 220 100% 18%;
-    --primary-hover: 45 77% 85%;
-    
-    /* Accent (teal for dark mode) */
-    --accent: 178 100% 35%;
-    --accent-foreground: 45 77% 89%;
-    --accent-hover: 178 100% 40%;
-    
-    /* Secondary (medium blue for dark mode) */
-    --secondary: 199 100% 25%;
-    --secondary-foreground: 45 77% 89%;
-    
+    /* Dark Mode - using black as primary dark background */
+    --background: 0 0% 8%; /* very dark gray, almost black */
+    --foreground: 0 0% 96.5%; /* #F6F6F6 light gray text */
+
+    /* Primary (sage green darker) */
+    --primary: 158 38% 60%; /* darker sage green */
+    --primary-foreground: 0 0% 0%; /* black text */
+    --primary-hover: 158 38% 65%;
+
+    /* Accent (mint green darker) */
+    --accent: 140 60% 70%; /* darker mint green */
+    --accent-foreground: 0 0% 0%;
+    --accent-hover: 140 60% 75%;
+
+    /* Secondary (dark gray) */
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 96.5%;
+
     /* UI Elements - Dark */
-    --card: 220 100% 12%;
-    --card-foreground: 45 77% 89%;
-    --popover: 220 100% 12%;
-    --popover-foreground: 45 77% 89%;
-    --muted: 199 100% 18%;
-    --muted-foreground: 45 40% 60%;
-    --border: 199 100% 22%;
-    --input: 199 100% 22%;
-    --ring: 45 77% 89%;
-    
+    --card: 0 0% 12%; /* dark cards */
+    --card-foreground: 0 0% 96.5%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 96.5%;
+    --muted: 0 0% 20%; /* dark muted */
+    --muted-foreground: 0 0% 70%;
+    --border: 0 0% 25%; /* dark borders */
+    --input: 0 0% 25%;
+    --ring: 158 38% 60%; /* sage green focus ring */
+
     /* Status Colors - Dark */
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 45 77% 89%;
-    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
     /* Sidebar Specific - Dark */
-    --sidebar: 220 100% 10%;
-    --sidebar-foreground: 45 77% 89%;
-    --sidebar-border: 199 100% 20%;
-    --sidebar-hover: 178 100% 20%;
-    --sidebar-accent: 178 100% 25%;
-    
+    --sidebar-background: 0 0% 8%; /* very dark background */
+    --sidebar-foreground: 0 0% 96.5%;
+    --sidebar-border: 0 0% 25%;
+    --sidebar-hover: 0 0% 15%; /* dark hover */
+    --sidebar-accent: 158 38% 60%; /* sage green accent */
+
     /* Chat Interface - Dark */
-    --chat-user: 45 77% 89%;
-    --chat-user-foreground: 220 100% 18%;
-    --chat-assistant: 220 100% 12%;
-    --chat-assistant-foreground: 45 77% 89%;
+    --chat-background: 0 0% 10%; /* dark chat background */
+    --chat-bubble-user: 158 38% 60%; /* sage green for user */
+    --chat-bubble-assistant: 0 0% 20%; /* dark gray for assistant */
   }
 }
 
