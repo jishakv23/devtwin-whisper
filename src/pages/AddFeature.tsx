@@ -5,15 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
-import {
-  ArrowLeft,
-  Save,
-  ExternalLink,
-  Github,
-  FileText,
-  Mic,
-  Palette
-} from 'lucide-react';
+import { ArrowLeft, Save, ExternalLink, FileText, Palette } from 'lucide-react';
 
 const AddFeature = () => {
   const navigate = useNavigate();
@@ -63,24 +55,24 @@ const AddFeature = () => {
       placeholder: 'https://figma.com/file/...',
       icon: <Palette className="w-4 h-4" style={{ color: '#A2D5C6' }} />
     },
-    {
-      key: 'github',
-      label: 'GitHub Repository',
-      placeholder: 'https://github.com/username/repo',
-      icon: <Github className="w-4 h-4" style={{ color: '#A2D5C6' }} />
-    },
+    // {
+    //   key: 'github',
+    //   label: 'GitHub Repository',
+    //   placeholder: 'https://github.com/username/repo',
+    //   icon: <Github className="w-4 h-4" style={{ color: '#A2D5C6' }} />
+    // },
     {
       key: 'notion',
       label: 'Notion Documentation',
       placeholder: 'https://notion.so/...',
       icon: <FileText className="w-4 h-4" style={{ color: '#A2D5C6' }} />
-    },
-    {
-      key: 'fireflies',
-      label: 'Fireflies Meeting Minutes',
-      placeholder: 'https://fireflies.ai/...',
-      icon: <Mic className="w-4 h-4" style={{ color: '#A2D5C6' }} />
     }
+    // {
+    //   key: 'fireflies',
+    //   label: 'Fireflies Meeting Minutes',
+    //   placeholder: 'https://fireflies.ai/...',
+    //   icon: <Mic className="w-4 h-4" style={{ color: '#A2D5C6' }} />
+    // }
   ];
 
   return (

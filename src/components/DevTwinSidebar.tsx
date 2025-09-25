@@ -1,38 +1,92 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Plus, Search, ArrowRight, Code, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+interface Chat {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ExploredFeature {
+  id: string;
+  feature_name: string;
+  description: string;
+  last_viewed: string;
+}
 
 interface SidebarProps {
-  onNewChat: () => void;
-  onSelectChat: (chatId: string) => void;
-  selectedChatId?: string;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 }
 
 export function DevTwinSidebar({
-  onNewChat,
-  onSelectChat,
-  selectedChatId,
   isCollapsed = false,
   onToggleCollapse
 }: SidebarProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [chatHistory, setChatHistory] = useState<Chat[]>([]);
+  const [exploredFeatures, setExploredFeatures] = useState<ExploredFeature[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
+  const [loadingExplored, setLoadingExplored] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentChatId = location.pathname.startsWith('/chat/')
+    ? location.pathname.split('/')[2]
+    : null;
 
-  const exploredFeatures = [{ name: 'API Integration' }, { name: 'Auth Flow' }];
+  // Dummy chat history data
+  useEffect(() => {
+    const dummyChats = [
+      {
+        id: '1',
+        title: 'API Integration Discussion',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '2',
+        title: 'Authentication Flow Review',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '3',
+        title: 'Database Schema Planning',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: '4',
+        title: 'UI Component Library',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ];
+    setChatHistory(dummyChats);
+    const dummyExploredFeatures = [
+      {
+        id: '1',
+        feature_name: 'API Integration',
+        description: 'API Integration Discussion',
+        last_viewed: new Date().toISOString()
+      }
+    ];
+    setExploredFeatures(dummyExploredFeatures);
+    setLoading(false);
+  }, []);
 
-  const chatHistory = [
-    { id: '1', title: 'Onboarding Query #1' },
-    { id: '2', title: 'Component Debug' },
-    { id: '3', title: 'Test Case Generation' },
-    { id: '4', title: 'Refactor Suggestion' }
-  ];
+  const handleNewChat = async () => {
+    navigate('/chat/new');
+  };
 
   const filteredHistory = chatHistory.filter((chat) =>
     chat.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -79,7 +133,7 @@ export function DevTwinSidebar({
 
         {isCollapsed ? (
           <Button
-            onClick={onNewChat}
+            onClick={handleNewChat}
             className="w-full justify-start gap-2 hover:bg-sidebar-hover px-2"
             variant="ghost"
           >
@@ -87,7 +141,7 @@ export function DevTwinSidebar({
           </Button>
         ) : (
           <Button
-            onClick={onNewChat}
+            onClick={handleNewChat}
             className="w-full justify-start gap-2 hover:bg-sidebar-hover px-0"
             variant="ghost"
           >
@@ -148,11 +202,14 @@ export function DevTwinSidebar({
           <div className="space-y-1">
             {exploredFeatures.map((feature) => (
               <Button
-                key={feature.name}
+                key={feature.id}
                 variant="ghost"
-                className="w-full justify-start h-8 text-sm hover:bg-sidebar-accent px-2"
+                onClick={() => navigate(`/features/${feature.id}`)}
+                className="w-full justify-start text-sm hover:bg-sidebar-accent py-3 px-2"
               >
-                {feature.name}
+                <div>
+                  <div className="font-medium">{feature.feature_name}</div>
+                </div>
               </Button>
             ))}
           </div>
@@ -167,21 +224,35 @@ export function DevTwinSidebar({
           </h3>
           <ScrollArea className="h-full">
             <div className="space-y-1">
-              {filteredHistory.map((chat) => (
-                <Button
-                  key={chat.id}
-                  variant="ghost"
-                  onClick={() => onSelectChat(chat.id)}
-                  className={cn(
-                    'w-full justify-start h-8 p-2 text-left text-sm hover:bg-sidebar-accent',
-                    selectedChatId === chat.id && 'bg-sidebar-accent',
-                    isCollapsed && 'justify-center'
-                  )}
-                  title={isCollapsed ? chat.title : undefined}
-                >
-                  <span className="truncate">{chat.title}</span>
-                </Button>
-              ))}
+              {loading ? (
+                // Loading skeleton
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-8 bg-sidebar-accent/20 rounded animate-pulse"
+                  />
+                ))
+              ) : filteredHistory.length === 0 ? (
+                <p className="text-sm text-muted-foreground p-2">
+                  No chat history
+                </p>
+              ) : (
+                filteredHistory.map((chat) => (
+                  <Button
+                    key={chat.id}
+                    variant="ghost"
+                    onClick={() => navigate(`/chat/${chat.id}`)}
+                    className={cn(
+                      'w-full justify-start h-8 p-2 text-left text-sm hover:bg-sidebar-accent',
+                      currentChatId === chat.id && 'bg-sidebar-accent',
+                      isCollapsed && 'justify-center'
+                    )}
+                    title={isCollapsed ? chat.title : undefined}
+                  >
+                    <span className="truncate">{chat.title}</span>
+                  </Button>
+                ))
+              )}
             </div>
           </ScrollArea>
         </div>

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -20,18 +21,85 @@ import {
 
 interface Feature {
   id: string;
-  name: string;
+  feature_name: string;
   description: string;
-  lastUpdated: string;
-  icon: React.ReactNode;
-  background: string;
+  created_at: string;
+  updated_at: string;
+  icon?: React.ReactNode;
+  background?: string;
 }
 
 const FeatureSummary = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const features: Feature[] = [
+  const [features, setFeatures] = useState<Feature[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch features on mount
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      const { data, error } = await supabase
+        .from('project_features')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching features:', error);
+        return;
+      }
+
+      // Map data to include icons and backgrounds
+      const featuresWithUI =
+        data?.map((feature) => ({
+          ...feature,
+          icon: getFeatureIcon(feature.feature_name),
+          background: getFeatureBackground(feature.id)
+        })) || [];
+
+      setFeatures(featuresWithUI);
+      setLoading(false);
+    };
+
+    fetchFeatures();
+  }, []);
+
+  // Helper function to assign icons based on feature name
+  const getFeatureIcon = (name: string) => {
+    const normalizedName = name.toLowerCase();
+    if (normalizedName.includes('auth'))
+      return <Shield className="w-6 h-6" style={{ color: '#000000' }} />;
+    if (normalizedName.includes('chat'))
+      return <Users className="w-6 h-6" style={{ color: '#000000' }} />;
+    if (normalizedName.includes('api'))
+      return <Database className="w-6 h-6" style={{ color: '#000000' }} />;
+    if (normalizedName.includes('code'))
+      return <Code className="w-6 h-6" style={{ color: '#000000' }} />;
+    if (normalizedName.includes('monitor'))
+      return <Zap className="w-6 h-6" style={{ color: '#000000' }} />;
+    if (normalizedName.includes('language'))
+      return <Globe className="w-6 h-6" style={{ color: '#000000' }} />;
+    if (normalizedName.includes('admin'))
+      return <Settings className="w-6 h-6" style={{ color: '#000000' }} />;
+    return <FileText className="w-6 h-6" style={{ color: '#000000' }} />;
+  };
+
+  // Helper function to assign background gradients
+  const getFeatureBackground = (id: string) => {
+    const gradients = [
+      'linear-gradient(135deg, #D6A99D 0%, #FBF3D5 100%)',
+      'linear-gradient(135deg, #FBF3D5 0%, #D6DAC8 100%)',
+      'linear-gradient(135deg, #D6DAC8 0%, #9CAFAA 100%)',
+      'linear-gradient(135deg, #9CAFAA 0%, #D6A99D 100%)',
+      'linear-gradient(135deg, #D6A99D 0%, #D6DAC8 100%)',
+      'linear-gradient(135deg, #FBF3D5 0%, #9CAFAA 100%)',
+      'linear-gradient(135deg, #D6DAC8 0%, #FBF3D5 100%)',
+      'linear-gradient(135deg, #9CAFAA 0%, #FBF3D5 100%)'
+    ];
+    return gradients[parseInt(id) % gradients.length];
+  };
+
+  const mockFeatures: Feature[] = [
     {
       id: '1',
       name: 'User Authentication System',
@@ -108,8 +176,10 @@ const FeatureSummary = () => {
 
   const filteredFeatures = features.filter((feature) => {
     const matchesSearch =
-      feature.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      feature.description.toLowerCase().includes(searchTerm.toLowerCase());
+      feature.feature_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (feature.description || '')
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
@@ -194,8 +264,9 @@ const FeatureSummary = () => {
               {filteredFeatures.map((feature) => (
                 <Card
                   key={feature.id}
-                  className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0 p-6 relative"
+                  className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0 p-6 relative cursor-pointer"
                   style={{ background: feature.background }}
+                  onClick={() => navigate(`/features/${feature.id}`)}
                 >
                   {/* Icon */}
                   <div className="absolute top-4 right-4">{feature.icon}</div>
@@ -206,7 +277,7 @@ const FeatureSummary = () => {
                       className="font-bold text-lg mb-4 leading-tight"
                       style={{ color: '#000000' }}
                     >
-                      {feature.name}
+                      {feature.feature_name}
                     </h3>
 
                     <p
@@ -225,7 +296,15 @@ const FeatureSummary = () => {
                         className="w-3 h-3 mr-1"
                         style={{ color: '#000000', opacity: 0.7 }}
                       />
-                      Updated {feature.lastUpdated}
+                      Updated{' '}
+                      {new Date(feature.updated_at).toLocaleDateString(
+                        'en-US',
+                        {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        }
+                      )}
                     </div>
                   </div>
                 </Card>
