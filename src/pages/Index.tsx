@@ -6,6 +6,7 @@ import { DevTwinHeader } from "@/components/DevTwinHeader";
 const Index = () => {
   const [selectedChatId, setSelectedChatId] = useState<string>();
   const [isDark, setIsDark] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     // Check for dark mode preference
@@ -31,12 +32,18 @@ const Index = () => {
     setSelectedChatId(chatId);
   };
 
+  const handleToggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   return (
     <div className="flex h-screen bg-background">
       <DevTwinSidebar 
         onNewChat={handleNewChat}
         onSelectChat={handleSelectChat}
         selectedChatId={selectedChatId}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={handleToggleSidebar}
       />
       <div className="flex-1 flex flex-col">
         <DevTwinHeader 
