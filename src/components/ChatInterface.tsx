@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,12 +25,24 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ chatId }: ChatInterfaceProps) {
+  const location = useLocation();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedFeature, setSelectedFeature] = useState<string>();
   const [features, setFeatures] = useState<Feature[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const streamingMessageRef = useRef<Message | null>(null);
+
+  // Clear state when navigating to /chat/new
+  useEffect(() => {
+    if (location.pathname === '/chat/new') {
+      setMessage('');
+      setMessages([]);
+      setSelectedFeature(undefined);
+      setIsStreaming(false);
+      streamingMessageRef.current = null;
+    }
+  }, [location.pathname]);
 
   // Fetch features on mount
   useEffect(() => {
@@ -166,6 +179,13 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
       handleSendMessage();
     }
   };
+
+  console.log(location.pathname);
+  console.log(messages);
+  console.log(selectedFeature);
+  console.log(features);
+  console.log(isStreaming);
+  console.log(streamingMessageRef.current);
 
   return (
     <div className="flex-1 flex flex-col bg-background">

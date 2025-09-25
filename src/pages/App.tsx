@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { DevTwinSidebar } from '@/components/DevTwinSidebar';
 import { ChatInterface } from '@/components/ChatInterface';
 
 const App = () => {
+  const location = useLocation();
   const [selectedChatId, setSelectedChatId] = useState<string>();
   const [isDark, setIsDark] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (location.pathname === '/chat/new') {
+      setSelectedChatId(undefined);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     // Check for dark mode preference

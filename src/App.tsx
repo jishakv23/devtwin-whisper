@@ -23,6 +23,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/app" element={<AppPage />} />
+          <Route path="/chat/new" element={<AppPage />} />
           <Route path="/chat/:id" element={<AppPage />} />
           <Route path="/features" element={<FeatureSummary />} />
           <Route path="/features/add" element={<AddFeature />} />
