@@ -30,56 +30,54 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const streamingMessageRef = useRef<Message | null>(null);
+  
+  // Session management - generate UUID for chat session and persist in browser
+  const [sessionId, setSessionId] = useState<string>(() => {
+    // Try to get existing session from localStorage, or generate new one
+    const existingSession = localStorage.getItem('devtwin-session-id');
+    if (existingSession) {
+      return existingSession;
+    }
+    // Generate new UUID using crypto.randomUUID() (available in modern browsers)
+    const newSessionId = crypto.randomUUID();
+    localStorage.setItem('devtwin-session-id', newSessionId);
+    return newSessionId;
+  });
 
-  // Fetch features on mount
+  // Fetch available features from Supabase database on component mount
+  // These features provide context for the AI chat responses
   useEffect(() => {
     const fetchFeatures = async () => {
-      const { data, error } = await supabase
-        .from('project_features')
-        .select('id, feature_name')
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('project_features')
+          .select('id, feature_name')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching features:', error);
-        return;
-      }
+        if (error) {
+          console.error('Error fetching features:', error);
+          return;
+        }
 
-      if (data) {
-        setFeatures(data);
+        if (data) {
+          setFeatures(data);
+        }
+      } catch (error) {
+        console.error('Unexpected error fetching features:', error);
       }
     };
 
     fetchFeatures();
   }, []);
 
-  // Set up streaming subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel('ai-response')
-      .on('broadcast', { event: 'ai-stream' }, ({ payload }) => {
-        if (streamingMessageRef.current) {
-          const updatedMessage = {
-            ...streamingMessageRef.current,
-            content: streamingMessageRef.current.content + payload.chunk
-          };
-          streamingMessageRef.current = updatedMessage;
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === updatedMessage.id ? updatedMessage : msg
-            )
-          );
-        }
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  // Note: Removed Supabase streaming subscription as we now use direct n8n webhook responses
+  // The streaming effect is now handled directly in handleSendMessage function
 
   const handleSendMessage = async () => {
+    // Early return if message is empty or just whitespace
     if (!message.trim()) return;
 
+    // Create user message object for immediate UI display
     const userMessage: Message = {
       id: Date.now().toString(),
       content: message,
@@ -88,10 +86,11 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
       featureId: selectedFeature
     };
 
+    // Optimistically update UI - show user message immediately
     setMessages((prev) => [...prev, userMessage]);
-    setMessage('');
+    setMessage(''); // Clear input field
 
-    // Create initial streaming message
+    // Create placeholder for AI response that will be updated with streaming content
     const streamingMessage: Message = {
       id: (Date.now() + 1).toString(),
       content: '',
@@ -100,69 +99,77 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
       featureId: selectedFeature
     };
 
+    // Add empty AI message to chat and set up streaming state
     setMessages((prev) => [...prev, streamingMessage]);
     streamingMessageRef.current = streamingMessage;
     setIsStreaming(true);
 
     try {
-      // Send message to your n18 endpoint
-      const response = await supabase
-        .from('chat_messages')
-        .insert({
-          content: message,
-          feature_id: selectedFeature,
-          is_user: true,
-          timestamp: new Date().toISOString()
+      // Call n8n webhook endpoint with the required payload structure
+      const webhookResponse = await fetch('https://commitment-issues.app.n8n.cloud/webhook/69af8b8b-2e81-44cc-afa6-3fdf90bd0cce/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chatInput: message, // The user's message content
+          feat_id: selectedFeature || 'default', // Feature ID for context
+          sessionId: sessionId // Persistent session ID for chat continuity
         })
-        .select();
+      });
 
-      if (response.error) {
-        throw response.error;
+      // Check if the webhook request was successful
+      if (!webhookResponse.ok) {
+        throw new Error(`Webhook request failed: ${webhookResponse.status} ${webhookResponse.statusText}`);
       }
 
-      // Subscribe to response channel for this message
-      const channel = supabase
-        .channel(`message-${response.data[0].id}`)
-        .on('broadcast', { event: 'ai-response' }, ({ payload }) => {
-          if (streamingMessageRef.current) {
-            const updatedMessage = {
-              ...streamingMessageRef.current,
-              content: streamingMessageRef.current.content + payload.chunk
-            };
-            streamingMessageRef.current = updatedMessage;
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === updatedMessage.id ? updatedMessage : msg
-              )
-            );
-          }
-        })
-        .subscribe();
+      // Parse the n8n webhook response
+      const responseData = await webhookResponse.json();
+      
+      // Validate response structure
+      if (!responseData.success) {
+        throw new Error('Webhook returned unsuccessful response');
+      }
 
-      // Cleanup subscription after 5 minutes
-      setTimeout(() => {
-        supabase.removeChannel(channel);
-      }, 5 * 60 * 1000);
+      // Update the streaming message with the complete AI response
+      if (streamingMessageRef.current && responseData.response) {
+        const updatedMessage = {
+          ...streamingMessageRef.current,
+          content: responseData.response // Set the complete AI response
+        };
+        streamingMessageRef.current = updatedMessage;
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === updatedMessage.id ? updatedMessage : msg
+          )
+        );
+      }
+
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error sending message to n8n webhook:', error);
+      
+      // Show user-friendly error message in chat
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now().toString(),
-          content: 'Sorry, there was an error processing your message.',
+          content: 'Sorry, there was an error processing your message. Please try again.',
           isUser: false,
           timestamp: new Date()
         }
       ]);
     } finally {
+      // Always clean up streaming state
       setIsStreaming(false);
       streamingMessageRef.current = null;
     }
   };
 
+  // Handle keyboard input for sending messages
+  // Enter key sends message, Shift+Enter allows new lines
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+      e.preventDefault(); // Prevent default form submission
       handleSendMessage();
     }
   };
