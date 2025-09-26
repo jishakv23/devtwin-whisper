@@ -131,11 +131,22 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
         throw new Error('Webhook returned unsuccessful response');
       }
 
-      // Update the streaming message with the complete AI response
+      // Update the streaming message with the complete AI response and reference links
       if (streamingMessageRef.current && responseData.response) {
+        // Format the response with reference links if they exist
+        let formattedContent = responseData.response;
+        
+        // Add reference links if they exist
+        if (responseData.reference_links && responseData.reference_links.length > 0) {
+          formattedContent += '\n\n---\n\n**📚 Reference Links:**\n';
+          responseData.reference_links.forEach((link, index) => {
+            formattedContent += `${index + 1}. [${link}](${link})\n`;
+          });
+        }
+        
         const updatedMessage = {
           ...streamingMessageRef.current,
-          content: responseData.response // Set the complete AI response
+          content: formattedContent // Set the complete AI response with reference links
         };
         streamingMessageRef.current = updatedMessage;
         setMessages((prev) =>
@@ -172,6 +183,38 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
       e.preventDefault(); // Prevent default form submission
       handleSendMessage();
     }
+  };
+
+  // Function to convert markdown links to clickable links
+  const formatMessageContent = (content: string) => {
+    // Convert markdown links [text](url) to clickable links
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const parts = content.split(linkRegex);
+    
+    return parts.map((part, index) => {
+      // Every 3rd part (index 2, 5, 8, etc.) is a URL
+      if (index % 3 === 2) {
+        const text = parts[index - 1];
+        const url = part;
+        return (
+          <a
+            key={index}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:text-blue-300 underline"
+          >
+            {text}
+          </a>
+        );
+      }
+      // Every 2nd part (index 1, 4, 7, etc.) is the link text, skip it
+      if (index % 3 === 1) {
+        return null;
+      }
+      // Regular text parts
+      return part;
+    }).filter(Boolean);
   };
 
   return (
@@ -245,9 +288,9 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
                         </div>
                         <div className="flex-1 min-w-0 pt-1">
                           <div className="text-foreground">
-                            <p className="text-sm leading-relaxed mb-0 whitespace-pre-wrap">
-                              {msg.content}
-                            </p>
+                            <div className="text-sm leading-relaxed mb-0 whitespace-pre-wrap">
+                              {formatMessageContent(msg.content)}
+                            </div>
                           </div>
                         </div>
                       </div>
