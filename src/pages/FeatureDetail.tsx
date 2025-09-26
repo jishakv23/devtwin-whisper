@@ -35,7 +35,10 @@ interface Feature {
     fireflies?: string;
   };
   summary?: string;
-  questions?: { questions: string[] };
+  files?: string[]; // Array of file URLs
+  questions?: { 
+    questions: (string | { question: string; answer?: string })[]
+  };
 }
 
 interface Question {
@@ -82,7 +85,8 @@ const FeatureDetail = () => {
           links: {
             figma: data.figma_link || undefined,
             notion: data.notion_link || undefined
-          }
+          },
+          files: data.files || []
         });
       }
       setLoading(false);
@@ -120,15 +124,99 @@ const FeatureDetail = () => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmitInput = () => {
+  const handleSubmitInput = async () => {
     if (!newInput.trim() && attachments.length === 0) return;
 
-    // Here you would submit the input and attachments
-    console.log('Submitting:', { input: newInput, attachments });
+    try {
+      const fileUrls: string[] = [];
+      
+      // Upload files to Supabase Storage if there are any
+      if (attachments.length > 0) {
+        for (const file of attachments) {
+          // Create a unique filename with timestamp
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const filePath = `features/${id}/${fileName}`;
+          
+          // Upload file to Supabase Storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('docs')
+            .upload(filePath, file);
 
-    // Reset form
-    setNewInput('');
-    setAttachments([]);
+          if (uploadError) {
+            console.error('Error uploading file:', uploadError);
+            continue; // Skip this file and continue with others
+          }
+
+          // Get the public URL for the uploaded file
+          const { data: urlData } = supabase.storage
+            .from('docs')
+            .getPublicUrl(filePath);
+
+          if (urlData?.publicUrl) {
+            fileUrls.push(urlData.publicUrl);
+          }
+        }
+      }
+
+      // Get current feature data to update the files array
+      const { data: currentFeature, error: fetchError } = await supabase
+        .from('project_features')
+        .select('files')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching current feature:', fetchError);
+        return;
+      }
+
+      // Update the files array with new URLs
+      const existingFiles = currentFeature.files || [];
+      const updatedFiles = [...existingFiles, ...fileUrls];
+
+      // Update the feature in Supabase with new files and input text
+      const updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+
+      // Add files if there are any
+      if (fileUrls.length > 0) {
+        updateData.files = updatedFiles;
+      }
+
+      // Add input text to summary or create a new field for additional notes
+      if (newInput.trim()) {
+        const currentSummary = feature?.summary || '';
+        updateData.summary = currentSummary + (currentSummary ? '\n\n' : '') + `Additional Notes: ${newInput.trim()}`;
+      }
+
+      const { error: updateError } = await supabase
+        .from('project_features')
+        .update(updateData)
+        .eq('id', id);
+
+      if (updateError) {
+        console.error('Error updating feature:', updateError);
+        return;
+      }
+
+      console.log('Files and input submitted successfully');
+      
+      // Update local state
+      setFeature(prev => prev ? {
+        ...prev,
+        files: updatedFiles,
+        summary: updateData.summary || prev.summary
+      } : null);
+
+      // Reset form
+      setNewInput('');
+      setAttachments([]);
+      
+    } catch (error) {
+      console.error('Unexpected error submitting files and input:', error);
+    }
   };
 
   const handleQuestionClick = (questionId: string) => {
@@ -138,11 +226,66 @@ const FeatureDetail = () => {
     );
   };
 
-  const handleSubmitAnswer = () => {
-    if (!selectedQuestion || !questionAnswer.trim()) return;
+  const handleSubmitAnswer = async () => {
+    if (!selectedQuestion || !questionAnswer.trim() || !id) return;
 
-    setSelectedQuestion(null);
-    setQuestionAnswer('');
+    try {
+      // Get the current feature data to update the questions object
+      const { data: currentFeature, error: fetchError } = await supabase
+        .from('project_features')
+        .select('questions')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching current feature:', fetchError);
+        return;
+      }
+
+      // Update the questions object to add the answer for the selected question
+      const updatedQuestions = {
+        ...currentFeature.questions,
+        questions: currentFeature.questions.questions.map((question: string) => {
+          if (question === selectedQuestion) {
+            // Add answer property to the question
+            return {
+              question: question,
+              answer: questionAnswer.trim()
+            };
+          }
+          return question;
+        })
+      };
+
+      // Update the feature in Supabase
+      const { error: updateError } = await supabase
+        .from('project_features')
+        .update({ 
+          questions: updatedQuestions,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (updateError) {
+        console.error('Error updating feature:', updateError);
+        return;
+      }
+
+      console.log('Answer submitted successfully');
+      
+      // Update the local state to reflect the changes
+      setFeature(prev => prev ? {
+        ...prev,
+        questions: updatedQuestions
+      } : null);
+
+      // Clear the form
+      setSelectedQuestion(null);
+      setQuestionAnswer('');
+      
+    } catch (error) {
+      console.error('Unexpected error submitting answer:', error);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -319,6 +462,53 @@ const FeatureDetail = () => {
                 </div>
               </Card>
 
+              {/* Uploaded Files Section */}
+              {feature?.files && feature.files.length > 0 && (
+                <Card
+                  className="p-6"
+                  style={{
+                    backgroundColor: '#1a1a1a'
+                  }}
+                >
+                  <h2 className="text-xl font-semibold text-white mb-4">
+                    Uploaded Files
+                  </h2>
+                  <div className="space-y-3">
+                    {feature.files.map((fileUrl, index) => {
+                      const fileName = fileUrl.split('/').pop() || `File ${index + 1}`;
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 rounded-lg bg-gray-800"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <FileText className="w-4 h-4" style={{ color: '#A2D5C6' }} />
+                            <div>
+                              <p className="text-sm font-medium text-white">
+                                {fileName}
+                              </p>
+                              <p className="text-xs text-gray-400 truncate max-w-xs">
+                                {fileUrl}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              window.open(fileUrl, '_blank', 'noopener,noreferrer')
+                            }
+                            className="text-white hover:text-opacity-80"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+              )}
+
               {/* Add More Data Section */}
               <Card
                 className="p-6"
@@ -432,33 +622,49 @@ const FeatureDetail = () => {
                   and documentation.
                 </p>
 
+                {/* Show answered questions count */}
+                {feature?.questions.questions.some(q => typeof q === 'object' && q.answer && q.answer.trim()) && (
+                  <div className="mb-4 p-3 bg-green-900/20 border border-green-600 rounded-lg">
+                    <p className="text-sm text-green-400">
+                      ✅ {feature.questions.questions.filter(q => typeof q === 'object' && q.answer && q.answer.trim()).length} question(s) answered
+                    </p>
+                  </div>
+                )}
+
                 <ScrollArea className="h-96">
                   <div className="space-y-4">
-                    {feature?.questions.questions.map((question) => (
-                      <div
-                        key={question}
-                        className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                          question
-                            ? 'bg-green-900/20 border-green-600'
-                            : selectedQuestion === question
-                            ? 'bg-blue-900/20 border-blue-600'
-                            : 'bg-gray-800 border-gray-600 hover:border-gray-500'
-                        }`}
-                        onClick={() => handleQuestionClick(question)}
-                      >
-                        <h3 className="text-sm font-medium text-white mb-2">
-                          {question}
-                        </h3>
+                    {feature?.questions.questions.map((question, index) => {
+                      // Handle both string questions and question objects
+                      const questionText = typeof question === 'string' ? question : question.question;
+                      const questionAnswer = typeof question === 'object' ? question.answer : null;
+                      const hasAnswer = questionAnswer && questionAnswer.trim();
+                      
+                      return (
+                        <div
+                          key={index}
+                          className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                            hasAnswer
+                              ? 'bg-green-900/20 border-green-600'
+                              : selectedQuestion === questionText
+                              ? 'bg-blue-900/20 border-blue-600'
+                              : 'bg-gray-800 border-gray-600 hover:border-gray-500'
+                          }`}
+                          onClick={() => handleQuestionClick(questionText)}
+                        >
+                          <h3 className="text-sm font-medium text-white mb-2">
+                            {questionText}
+                          </h3>
 
-                        {/* {question.answered && question.answer && (
-                          <div className="mt-3 p-3 bg-gray-700/50 rounded border-l-2 border-green-500">
-                            <p className="text-xs text-white">
-                              <strong>Answer:</strong> {question.answer}
-                            </p>
-                          </div>
-                        )} */}
-                      </div>
-                    ))}
+                          {hasAnswer && (
+                            <div className="mt-3 p-3 bg-gray-700/50 rounded border-l-2 border-green-500">
+                              <p className="text-xs text-white">
+                                <strong>Answer:</strong> {questionAnswer}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </ScrollArea>
 
